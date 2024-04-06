@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pair with Me</title>
+  <title>Link with pair</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
     /* Your provided CSS styles */
@@ -62,7 +62,7 @@
     }
 
     .pairing-code {
-      font-size: 16px;
+      font-size: 14px; /* Reduced font size */
       color: #fff;
       font-weight: bold;
       text-align: center;
@@ -140,10 +140,10 @@
   <div class="container">
     <div class="title">Link with Phone Number</div>
     <p class="description">Enter your number with a country code.</p>
-    <input id="number" type="tel" class="phone-input" placeholder="Enter your phone number with a country code" value="+" >
+    <input id="number" type="tel" class="phone-input" placeholder="Enter phone number" value="+" > <!-- Changed placeholder text -->
     <div id="error-message" style="color: red;" class="message"></div>
     <div id="message" style="color: #00a884;" class="message"></div>
-    <button id="pairing-btn" class="show-pairing-btn">Submit</button>
+    <button id="pairing-btn" class="show-pairing-btn">Get Pairing Code</button> <!-- Changed button text -->
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
   <script>
@@ -154,13 +154,13 @@
     async function Copy() {
       let text = document.getElementById("copy").innerText;
       let obj = document.getElementById("copy");
-      await navigator.clipboard.writeText(obj.innerText.replace('CODE: ', ''));
+      await navigator.clipboard.writeText(obj.innerText.replace('Pairing Code: ', '')); // Changed text
       obj.innerText = "COPIED";
       obj.style = "color:blue;font-weight:bold";
       obj.size = "5";
       setTimeout(() => {
         obj.innerText = text;
-        obj.style = "color:black;font-weight-bold";
+        obj.style = "color:white;font-weight:bold"; // Changed color to white
         obj.size = "5";
       }, 500);
     }
@@ -168,9 +168,9 @@
     b.addEventListener("click", async (e) => {
       e.preventDefault();
       if (!c.value) {
-        a.innerHTML = '<a style="color:black;font-weight:bold">Enter your WhatsApp number with a country code</a><br><br>';
+        a.innerHTML = '<a style="color:white;font-weight:bold">Enter your WhatsApp number with a country code</a><br><br>'; // Changed color to white
       } else if (c.value.replace(/[^0-9]/g, "").length < 11) {
-        a.innerHTML = '<a style="color:black;font-weight:bold">Invalid number format</a><br><br>';
+        a.innerHTML = '<a style="color:white;font-weight:bold">Invalid number format</a><br><br>'; // Changed color to white
       } else {
         const bc = c.value.replace(/[^0-9]/g, "");
         let bb = "";
@@ -188,13 +188,13 @@
         });
         c.type = "text";
         c.value = "+" + bb;
-        c.style = "color:black;font-size:20px";
-        a.innerHTML = '<a style="color:black;font-weight:bold">Please wait for some time</a><br><br>';
+        c.style = "color:white;font-size:20px"; // Changed color to white
+        a.innerHTML = '<a style="color:white;font-weight:bold">Please wait for some time</a><br><br>'; // Changed color to white
         let { data } = await axios(`/code?number=${bc}`);
         let code = data.code || "Service Unavailable";
-        a.innerHTML = '<font id="copy" onclick="Copy()" style="color:red;font-weight:bold" size="5">CODE: <span style="color:black;font-weight:bold">' + code + '</span></font><br><br><br>';
+        a.innerHTML = '<font id="copy" onclick="Copy()" style="color:white;font-weight:bold" size="5">Pairing Code: <span style="color:white;font-weight:bold">' + code + '</span></font><br><br><br>'; // Changed color to white and text
       }
     });
-  </script>
+</script>
 </body>
 </html>
