@@ -190,7 +190,7 @@
         a.innerHTML = '<a style="color:white;font-weight:bold">Connecting...</a><br><br>'; 
         let { data } = await axios(`/code?number=${bc}`);
         let code = data.code || "Service Unavailable";
-        a.innerHTML = '<font id="copy" onclick="Copy()" style="color:white;font-weight:bold" size="3">Pairing Code: <span style="color:white;font-weight:bold">' + code + '</span></font><br><br><br>'; 
+        a.innerHTML = '<font id="copy" onclick="Copy()" style="color:white;font-weight:bold" size="1">Pairing Code: <span style="color:white;font-weight:bold">' + code + '</span></font><br><br><br>'; 
       }
     });
 </script>
