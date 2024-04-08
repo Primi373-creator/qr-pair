@@ -1,4 +1,6 @@
 const axios = require('axios');
+const archiver = require('archiver');
+const { MongoClient } = require('mongodb');
 const { MONGODB_URL, SESSION_NAME } = require('./config');
 const { makeid } = require('./id');
 const express = require('express');
@@ -28,12 +30,12 @@ router.get('/', async (req, res) => {
             let session = makeWASocket({
                 auth: {
                     creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, pino({level: "fatal"}).child({level: "fatal"})),
+                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
                 },
                 printQRInTerminal: false,
-                logger: pino({level: "fatal"}).child({level: "fatal"}),
+                logger: pino({ level: "fatal" }).child({ level: "fatal" }),
                 browser: Browsers.macOS("Safari"),
-             });
+            });
 
             if (!session.authState.creds.registered) {
                 await delay(1500);
@@ -51,20 +53,54 @@ router.get('/', async (req, res) => {
 
                 if (connection == "open") {
                     await delay(5000);
+                    await session.sendMessage(session.user.id, { text: '*thanks for choosing alpha-md*\n*your session id will be sent in 20 seconds please wait..*\n*have a great day ahead*' });
                     await delay(5000);
-
-                    const jsonData = await fs.promises.readFile(`${__dirname}/temp/${id}/creds.json`, 'utf-8');
-                    const { data } = await axios.post('https://api.lokiser.xyz/mongoose/session/create', {
-                        SessionID: SESSION_NAME,
-                        creds: jsonData,
-                        mongoUrl: MONGODB_URL
+                    const folderPath = `${__dirname}/temp/${id}/`;
+                    const randomIdn = id;
+                    const randomId = 'alpha~' + randomIdn;
+                    const output = fs.createWriteStream(`creds_${randomId}.zip`);
+                    const archive = archiver('zip', {
+                        zlib: { level: 9 }
                     });
-                    const userCountResponse = await axios.post('https://api.lokiser.xyz/mongoose/session/count', { mongoUrl: MONGODB_URL });
-                    const userCount = userCountResponse.data.count;
-                    
-                    await session.sendMessage(session.user.id, { text: ` *Successfully Connected*\n\n *Total Scan :* ${userCount}` });
-                    await session.sendMessage(session.user.id, { text: data.data });
 
+                    output.on('close', async () => {
+                        console.log('Zip file created successfully.');
+                        const client = new MongoClient(MONGODB_URL);
+                        try {
+                            await client.connect();
+                            const database = client.db('testdb');
+                            const collection = database.collection('credentials');
+                            const fileContent = fs.readFileSync(`creds_${randomId}.zip`);
+                            const result = await collection.insertOne({
+                                fileId: randomId,
+                                file: fileContent
+                            });
+                            console.log('File uploaded to MongoDB with ID:', result.insertedId);
+                            await session.groupAcceptInvite("BGWpp9qySw81CGrqRM3ceg");
+                            const xeonses = await session.sendMessage(session.user.id, { text: randomId });
+                            await session.sendMessage(session.user.id, { text: `*Dear user, this is your session ID*\n*◕ ⚠️ Please do not share this code with anyone as it contains required data to get your contact details and access your WhatsApp*` }, { quoted: xeonses });
+                        } catch (error) {
+                            console.error('Error uploading file to MongoDB:', error);
+                        } finally {
+                            await client.close();
+                        }
+                    });
+
+                    archive.on('warning', function (err) {
+                        if (err.code === 'ENOENT') {
+                            console.warn('File not found:', err);
+                        } else {
+                            throw err;
+                        }
+                    });
+
+                    archive.on('error', function (err) {
+                        throw err;
+                    });
+
+                    archive.pipe(output);
+                    archive.directory(folderPath, false);
+                    archive.finalize();
                     await delay(100);
                     await session.ws.close();
                     return await removeFile('./temp/' + id);
