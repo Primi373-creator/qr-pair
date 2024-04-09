@@ -6,6 +6,7 @@ const express = require('express');
 const fs = require('fs')
 const router = express.Router();
 const { default: makeWASocket, Browsers, delay, useMultiFileAuthState, BufferJSON, fetchLatestBaileysVersion, PHONENUMBER_MCC, DisconnectReason, makeInMemoryStore, jidNormalizedUser, makeCacheableSignalKeyStore } = require("@whiskeysockets/baileys")
+const Pino = require("pino")
 const pino = require("pino")
 const NodeCache = require("node-cache")
 const chalk = require("chalk")
