@@ -41,7 +41,7 @@ const {  state, saveCreds } =await useMultiFileAuthState('./session/'+id)
       defaultQueryTimeoutMs: undefined, // for this issues https://github.com/WhiskeySockets/Baileys/issues/276
    })
  if (!XeonBotInc.authState.creds.registered) {
-  const phoneNumber = num
+  let phoneNumber = num
       if (!!phoneNumber) {
          phoneNumber = phoneNumber.replace(/[^0-9]/g, '')
       } else {
