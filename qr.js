@@ -1,6 +1,4 @@
 const axios = require('axios');
-const archiver = require('archiver');
-const { MongoClient } = require('mongodb');
 const { MONGODB_URL, SESSION_NAME } = require('./config');
 const { makeid } = require('./id');
 const QRCode = require('qrcode');
