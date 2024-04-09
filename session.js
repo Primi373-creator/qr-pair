@@ -1,5 +1,4 @@
 const express = require('express');
-const { MongoClient } = require('mongodb');
 const { MONGODB_URL, ADMIN_KEY } = require('./config');
 
 const router = express.Router();
