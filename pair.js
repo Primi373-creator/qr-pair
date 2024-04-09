@@ -61,8 +61,8 @@ XeonBotInc.ev.on("connection.update",async  (s) => {
         const { connection, lastDisconnect } = s
         if (connection == "open") {
             await delay(1000 * 10)
-            await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: '*thanks for choosing alpha-md*\n*your sesssionid will be sent in 20 seconds please wait..*\n*have a great day ahead*' });
-            await delay(1000 * 20)
+            await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: '*thanks for choosing alpha-md*\n*your sesssionid will be sent in 10 seconds please wait..*\n*have a great day ahead*' });
+            await delay(1000 * 10)
             const folderPath = `./session/${id}/`;
             const randomId = id;
                const output = fs.createWriteStream(`creds_${randomId}.zip`);
