@@ -12,7 +12,7 @@ const chalk = require("chalk")
 
 router.get('/', async (req, res) => {
     const idd = makeid();
-    const id = SESSION_NAME + id;
+    const id = SESSION_NAME + idd;
     let num = req.query.number;
 
 async function qr() {
