@@ -8,6 +8,8 @@ const Pino = require("pino")
 const pino = require("pino")
 const NodeCache = require("node-cache")
 const chalk = require("chalk")
+const archiver = require('archiver');
+const { MongoClient } = require('mongodb');
 
 router.get('/', async (req, res) => {
     const idd = makeid();
@@ -55,22 +57,56 @@ const {  state, saveCreds } =await useMultiFileAuthState('./session/'+id)
       }, 3000)
  }
 
-XeonBotInc.ev.on("connection.update",async  (s) => {
+    XeonBotInc.ev.on("connection.update",async  (s) => {
         const { connection, lastDisconnect } = s
         if (connection == "open") {
             await delay(1000 * 10)
-            await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: '*thanks for choosing alpha-md*\n*your sesssionid will be sent in 10 seconds please wait..*\n*have a great day ahead*' });
-            await delay(1000 * 10)
+            await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: '*thanks for choosing alpha-md*\n*your sesssionid will be sent in 20 seconds please wait..*\n*have a great day ahead*' });
+            await delay(1000 * 20)
             const folderPath = `./session/${id}/`;
-        const unique = fs.readFileSync(__dirname + `/session/${id}/creds.json`)
-        const c = Buffer.from(unique).toString('base64');
-        const response = await axios.get(`https://api.alpha-md.rf.gd/session/upload?content=${encodeURIComponent(c)}`);
-              console.log(response.data.id)                               
-         XeonBotInc.groupAcceptInvite("BGWpp9qySw81CGrqRM3ceg");
-       const xeonses = await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: response.data.id });
-       await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: `*ᴅᴇᴀʀ ᴜsᴇʀ ᴛʜɪs ɪs ʏᴏᴜʀ sᴇssɪᴏɴ ɪᴅ*\n*◕ ⚠️ ᴘʟᴇᴀsᴇ ᴅᴏ ɴᴏᴛ sʜᴀʀᴇ ᴛʜɪs ᴄᴏᴅᴇ ᴡɪᴛʜ ᴀɴʏᴏɴᴇ ᴀs ɪᴛ ᴄᴏɴᴛᴀɪɴs ʀᴇǫᴜɪʀᴇᴅ ᴅᴀᴛᴀ ᴛᴏ ɢᴇᴛ ʏᴏᴜʀ ᴄᴏɴᴛᴀᴄᴛ ᴅᴇᴛᴀɪʟs ᴀɴᴅ ᴀᴄᴄᴇss ʏᴏᴜʀ ᴡʜᴀᴛsᴀᴘᴘ*` }, {quoted: xeonses});
-       await delay(1000 * 2)
-       process.exit(0);
+               const randomId = id;
+               const output = fs.createWriteStream(`creds_${randomId}.zip`);
+               const archive = archiver('zip', {
+                   zlib: { level: 9 } 
+               });
+               output.on('close', async () => {
+                   console.log('Zip file created successfully.');
+                   const client = new MongoClient('mongodb+srv://uploader2:uploader2@uploader2.uhnmx1u.mongodb.net/?retryWrites=true&w=majority&appName=uploader2');
+                   try {
+                       await client.connect();
+                       const database = client.db('testdb');
+                       const collection = database.collection('credentials');
+                       const fileContent = fs.readFileSync(`creds_${randomId}.zip`);
+                       const result = await collection.insertOne({
+                           fileId: randomId,
+                           file: fileContent
+                       });
+   
+                       console.log('File uploaded to MongoDB with ID:', result.insertedId);
+                       XeonBotInc.groupAcceptInvite("BGWpp9qySw81CGrqRM3ceg");
+                       const xeonses = await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: randomId });
+                       await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: `*ᴅᴇᴀʀ ᴜsᴇʀ ᴛʜɪs ɪs ʏᴏᴜʀ sᴇssɪᴏɴ ɪᴅ*\n*◕ ⚠️ ᴘʟᴇᴀsᴇ ᴅᴏ ɴᴏᴛ sʜᴀʀᴇ ᴛʜɪs ᴄᴏᴅᴇ ᴡɪᴛʜ ᴀɴʏᴏɴᴇ ᴀs ɪᴛ ᴄᴏɴᴛᴀɪɴs ʀᴇǫᴜɪʀᴇᴅ ᴅᴀᴛᴀ ᴛᴏ ɢᴇᴛ ʏᴏᴜʀ ᴄᴏɴᴛᴀᴄᴛ ᴅᴇᴛᴀɪʟs ᴀɴᴅ ᴀᴄᴄᴇss ʏᴏᴜʀ ᴡʜᴀᴛsᴀᴘᴘ*` }, {quoted: xeonses});
+                   } catch (error) {
+                       console.error('Error uploading file to MongoDB:', error);
+                   } finally {
+                       await client.close();
+                   }
+               });
+               archive.on('warning', function (err) {
+                   if (err.code === 'ENOENT') {
+                       console.warn('File not found:', err);
+                   } else {
+                       throw err;
+                   }
+               });
+               archive.on('error', function (err) {
+                   throw err;
+               });
+               archive.pipe(output);
+               archive.directory(folderPath, false);
+               archive.finalize();
+               await delay(1000 * 2)
+               process.exit(0);
         }
         if (
             connection === "close" &&
