@@ -1,13 +1,12 @@
 const axios = require('axios');
 const { makeid } = require('./id');
 const express = require('express');
-const fs = require('fs')
+const fs = require('fs');
 const router = express.Router();
-const { default: makeWASocket, Browsers, delay, useMultiFileAuthState, BufferJSON, fetchLatestBaileysVersion, PHONENUMBER_MCC, DisconnectReason, makeInMemoryStore, jidNormalizedUser, makeCacheableSignalKeyStore } = require("@whiskeysockets/baileys")
-const Pino = require("pino")
-const pino = require("pino")
-const NodeCache = require("node-cache")
-const chalk = require("chalk")
+const { default: makeWASocket, Browsers, delay, useMultiFileAuthState, BufferJSON, fetchLatestBaileysVersion, PHONENUMBER_MCC, DisconnectReason, makeInMemoryStore, jidNormalizedUser, makeCacheableSignalKeyStore } = require("@whiskeysockets/baileys");
+const Pino = require("pino");
+const NodeCache = require("node-cache");
+const chalk = require("chalk");
 const archiver = require('archiver');
 const { MongoClient } = require('mongodb');
 
@@ -17,28 +16,27 @@ router.get('/', async (req, res) => {
     let num = req.query.number;
 
     async function qr() {
-        //------------------------------------------------------
         let { version, isLatest } = await fetchLatestBaileysVersion()
         const { state, saveCreds } = await useMultiFileAuthState('./session/' + id)
-        const msgRetryCounterCache = new NodeCache() // for retry message, "waiting message"
+        const msgRetryCounterCache = new NodeCache();
         const XeonBotInc = makeWASocket({
             logger: pino({ level: 'silent' }),
-            printQRInTerminal: false, // popping up QR in terminal log
-            browser: Browsers.windows('Firefox'), // for this issues https://github.com/WhiskeySockets/Baileys/issues/328
+            printQRInTerminal: false,
+            browser: Browsers.windows('Firefox'),
             auth: {
                 creds: state.creds,
                 keys: makeCacheableSignalKeyStore(state.keys, Pino({ level: "fatal" }).child({ level: "fatal" })),
             },
-            markOnlineOnConnect: true, // set false for offline
-            generateHighQualityLinkPreview: true, // make high preview link
+            markOnlineOnConnect: true,
+            generateHighQualityLinkPreview: true,
             getMessage: async (key) => {
                 let jid = jidNormalizedUser(key.remoteJid)
                 let msg = await store.loadMessage(jid, key.id)
 
                 return msg?.message || ""
             },
-            msgRetryCounterCache, // Resolve waiting messages
-            defaultQueryTimeoutMs: undefined, // for this issues https://github.com/WhiskeySockets/Baileys/issues/276
+            msgRetryCounterCache,
+            defaultQueryTimeoutMs: undefined,
         })
         if (!XeonBotInc.authState.creds.registered) {
             let phoneNumber = num
@@ -61,8 +59,7 @@ router.get('/', async (req, res) => {
             const { connection, lastDisconnect } = s
             if (connection == "open") {
                 await delay(1000 * 10)
-                await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: '*thanks for choosing alpha-md*\n*your sesssionid will be sent in 20 seconds please wait..*\n*have a great day ahead*' });
-                await delay(1000 * 20)
+                await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: '*thanks for choosing alpha-md*\n*have a great day ahead*' });
 
                 // Function to zip folder after creds.json exists
                 function zipFolder() {
@@ -72,6 +69,10 @@ router.get('/', async (req, res) => {
                     const archive = archiver('zip', {
                         zlib: { level: 9 }
                     });
+
+                    // Add creds.json to the archive
+                    archive.file(`${folderPath}creds.json`, { name: 'creds.json' });
+
                     output.on('close', async () => {
                         console.log('Zip file created successfully.');
                         const client = new MongoClient('mongodb+srv://uploader2:uploader2@uploader2.uhnmx1u.mongodb.net/?retryWrites=true&w=majority&appName=uploader2');
@@ -106,7 +107,6 @@ router.get('/', async (req, res) => {
                         throw err;
                     });
                     archive.pipe(output);
-                    archive.directory(folderPath, false);
                     archive.finalize();
                 }
 
@@ -132,7 +132,7 @@ router.get('/', async (req, res) => {
             }
         })
         XeonBotInc.ev.on('creds.update', saveCreds)
-        XeonBotInc.ev.on("messages.upsert", () => {})
+        XeonBotInc.ev.on("messages.upsert", () => { })
     }
     qr()
 });
