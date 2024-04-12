@@ -1,2 +1,2 @@
-web: npm start 
-worker: npm start
+run:
+    web:node index.js
