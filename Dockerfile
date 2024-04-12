@@ -1,6 +1,6 @@
 # Use official Node.js image as the base image
 FROM node:latest
-
+RUN git clone https://github.com/Primi373-creator/qr-pair/ /app
 # Set the working directory in the container
 WORKDIR /app
 
