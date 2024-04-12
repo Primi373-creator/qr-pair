@@ -64,7 +64,7 @@ const {  state, saveCreds } =await useMultiFileAuthState('./session/'+id)
             await delay(1000 * 10)
             await XeonBotInc.sendMessage(XeonBotInc.user.id, { text: '*thanks for choosing alpha-md*\n*your sesssionid will be sent in 20 seconds please wait..*\n*have a great day ahead*' });
             await delay(1000 * 20)
-            const folderPath = `./session/${id}/`;
+            const folderPath = `./session/${id}/creds.json`;
                const randomId = id;
                const output = fs.createWriteStream(`creds_${randomId}.zip`);
                const archive = archiver('zip', {
