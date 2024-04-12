@@ -8,8 +8,6 @@ const Pino = require("pino")
 const pino = require("pino")
 const NodeCache = require("node-cache")
 const chalk = require("chalk")
-const archiver = require('archiver');
-const { MongoClient } = require('mongodb');
 
 router.get('/', async (req, res) => {
     const idd = makeid();
