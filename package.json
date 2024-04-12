@@ -2,6 +2,7 @@
     "name": "qr",
     "description": "qr",
     "main": "./index.js",
+    "preferrePackageManager": "npm",
     "scripts": {
         "start": "node index.js"
     },
