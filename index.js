@@ -22,6 +22,8 @@ app.get('/qr', (req, res) => {
 
 let pair = require('./pair');
 app.use('/code', pair);
+let scan = require('./qr');
+app.use('/server/scan', scan);
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__path, '/public/index.html'));
