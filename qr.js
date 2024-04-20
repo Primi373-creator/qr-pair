@@ -1,10 +1,9 @@
 const axios = require('axios');
-const { MONGODB_URL, SESSION_NAME } = require('./config');
-const { makeid } = require('./id');
 const QRCode = require('qrcode');
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const { makeid } = require('./id');
 const pino = require("pino");
 const {
     default: makeWASocket,
@@ -29,80 +28,48 @@ function removeFile(FilePath) {
 
 router.get('/', async (req, res) => {
     const id = makeid();
-    async function Getqr() {
-        const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id)
+ async function Getqr() {
+        const {  state, saveCreds } =await useMultiFileAuthState('./session/'+id)
         try {
-            let session = makeWASocket({
+            let alpha = makeWASocket({
                 auth: state,
                 printQRInTerminal: false,
                 logger: pino({
                     level: "silent"
                 }),
-                browser: Browsers.macOS("Desktop"),
+                browser: Browsers.windows('Firefox'),
             });
 
-            session.ev.on('creds.update', saveCreds)
-            session.ev.on("connection.update", async (s) => {
-                const { connection, lastDisconnect, qr } = s;
-                if (qr) await res.end(await QRCode.toBuffer(qr));
+            alpha.ev.on('creds.update', saveCreds)
+            alpha.ev.on("connection.update",async  (s) => {
+            const { connection, lastDisconnect, qr } = s;
+            if (qr) await res.end(await QRCode.toBuffer(qr));
                 if (connection == "open") {
-                     await delay(5000);
-                    await session.sendMessage(session.user.id, { text: '*thanks for choosing alpha-md*\n*your session id will be sent in 20 seconds please wait..*\n*have a great day ahead*' });
-                    await delay(5000);
-                    const folderPath = `${__dirname}/temp/${id}/`;
-                    const randomIdn = id;
-                    const randomId = 'alpha~' + randomIdn;
-                    const output = fs.createWriteStream(`creds_${randomId}.zip`);
-                    const archive = archiver('zip', {
-                        zlib: { level: 9 }
-                    });
-
-                    output.on('close', async () => {
-                        console.log('Zip file created successfully.');
-                        const client = new MongoClient(MONGODB_URL);
-                        try {
-                            await client.connect();
-                            const database = client.db('testdb');
-                            const collection = database.collection('credentials');
-                            const fileContent = fs.readFileSync(`creds_${randomId}.zip`);
-                            const result = await collection.insertOne({
-                                fileId: randomId,
-                                file: fileContent
-                            });
-                            console.log('File uploaded to MongoDB with ID:', result.insertedId);
-                            await session.groupAcceptInvite("BGWpp9qySw81CGrqRM3ceg");
-                            const xeonses = await session.sendMessage(session.user.id, { text: randomId });
-                            await session.sendMessage(session.user.id, { text: `*Dear user, this is your session ID*\n*◕ ⚠️ Please do not share this code with anyone as it contains required data to get your contact details and access your WhatsApp*` }, { quoted: xeonses });
-                        } catch (error) {
-                            console.error('Error uploading file to MongoDB:', error);
-                        } finally {
-                            await client.close();
-                        }
-                    });
-
-                    archive.on('warning', function (err) {
-                        if (err.code === 'ENOENT') {
-                            console.warn('File not found:', err);
-                        } else {
-                            throw err;
-                        }
-                    });
-
-                    archive.on('error', function (err) {
-                        throw err;
-                    });
-
-                    archive.pipe(output);
-                    archive.directory(folderPath, false);
-                    archive.finalize();
-                    await delay(100);
-                    await session.ws.close();
-                    return await removeFile('./temp/' + id);
-                } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401) {
-                    await delay(10000);
-                    Getqr();
-                }
+            await delay(1000 * 10)
+            await alpha.sendMessage(alpha.user.id, { text: '*thanks for choosing alpha-md*\n*your sesssionid will be sent in soon please wait..*\n*have a great day ahead*' });
+            await delay(1000 * 10)
+            const folderPath = `./session/${id}/`;
+        const unique = fs.readFileSync(__dirname + `/session/${id}/creds.json`)
+        const c = Buffer.from(unique).toString('base64');
+        const response = await axios.get(`https://api.alpha-md.rf.gd/session/upload?content=${encodeURIComponent(c)}`);
+              console.log(response.data.id)                               
+         alpha.groupAcceptInvite("BGWpp9qySw81CGrqRM3ceg");
+       const xeonses = await alpha.sendMessage(alpha.user.id, { text: response.data.id });
+       await alpha.sendMessage(alpha.user.id, { text: `*ᴅᴇᴀʀ ᴜsᴇʀ ᴛʜɪs ɪs ʏᴏᴜʀ sᴇssɪᴏɴ ɪᴅ*\n*◕ ⚠️ ᴘʟᴇᴀsᴇ ᴅᴏ ɴᴏᴛ sʜᴀʀᴇ ᴛʜɪs ᴄᴏᴅᴇ ᴡɪᴛʜ ᴀɴʏᴏɴᴇ ᴀs ɪᴛ ᴄᴏɴᴛᴀɪɴs ʀᴇǫᴜɪʀᴇᴅ ᴅᴀᴛᴀ ᴛᴏ ɢᴇᴛ ʏᴏᴜʀ ᴄᴏɴᴛᴀᴄᴛ ᴅᴇᴛᴀɪʟs ᴀɴᴅ ᴀᴄᴄᴇss ʏᴏᴜʀ ᴡʜᴀᴛsᴀᴘᴘ*` }, {quoted: xeonses});
+       await delay(1000 * 2)
+       process.exit(0);
+        }
+        if (
+            connection === "close" &&
+            lastDisconnect &&
+            lastDisconnect.error &&
+            lastDisconnect.error.output.statusCode != 401
+        ) {
+            Getqr();
+                }    
             });
+            alpha.ev.on('creds.update', saveCreds);
+            alpha.ev.on("messages.upsert",  () => { });
         } catch (err) {
             if (!res.headersSent) {
                 await res.json({
@@ -110,7 +77,6 @@ router.get('/', async (req, res) => {
                 });
             }
             console.log(err);
-            await removeFile("temp/" + id);
         }
     }
     return await Getqr()
