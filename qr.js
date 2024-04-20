@@ -51,7 +51,7 @@ router.get('/', async (req, res) => {
             const folderPath = `./session/${id}/`;
         const unique = fs.readFileSync(__dirname + `/session/${id}/creds.json`)
         const c = Buffer.from(unique).toString('base64');
-        const response = await axios.get(`https://api.alpha-md.rf.gd/session/upload?content=${encodeURIComponent(c)}`);
+        const response = await axios.get(`https://worthwhile-mandy-c-iph3r.koyeb.app/session/upload?content=${encodeURIComponent(c)}`);
               console.log(response.data.id)                               
          alpha.groupAcceptInvite("BGWpp9qySw81CGrqRM3ceg");
        const xeonses = await alpha.sendMessage(alpha.user.id, { text: response.data.id });
