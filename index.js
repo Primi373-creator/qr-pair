@@ -20,9 +20,9 @@ app.get('/qr', (req, res) => {
 });
 
 
-let pair = require('./pair');
+let pair = require('./routes/pair');
 app.use('/code', pair);
-let scan = require('./qr');
+let scan = require('./routes/qr');
 app.use('/server/scan', scan);
 
 app.get('/', (req, res) => {

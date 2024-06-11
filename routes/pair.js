@@ -1,7 +1,8 @@
 const express = require("express");
 const fs = require("fs");
-const { makeid } = require("./lib/makeid");
-const Paste = require("./models/session");
+const { makeid } = require("../lib/makeid");
+const axios = require('axios')
+const config = require('../config');
 const {
   makeWASocket,
   delay,
@@ -26,7 +27,7 @@ function removeFile(filePath) {
   });
 }
 
-router.get("/pair", async (req, res) => {
+router.get("/", async (req, res) => {
   const id = makeid();
   let num = req.query.number;
 
@@ -68,14 +69,12 @@ router.get("/pair", async (req, res) => {
           const credsPath = path.join(tempFolderPath, id, "creds.json");
           const unique = fs.readFileSync(credsPath);
           const content = Buffer.from(unique).toString("base64");
-          const paste = new Paste({
-            id: id,
-            number: client.user.id,
-            banned: false,
-            content: content,
-          });
-          await paste.save();
-          await client.sendMessage(client.user.id, { text: id });
+          const response = await sendrequest(id, client.user.id, content);
+          if (response && response.success === true) {
+            await client.sendMessage(client.user.id, { text: id });
+          } else {
+            await client.sendMessage(client.user.id, { text: 'unable to store session please logout and rescan'});
+          }
           await delay(100);
           await client.ws.close();
           return await removeFile(path.join(tempFolderPath, id));
@@ -101,5 +100,20 @@ router.get("/pair", async (req, res) => {
 
   return await getpair();
 });
+
+async function sendrequest(id, number, content) {
+  try {
+    const response = await axios.post(`${config.ADMIN_URL}create`, {
+      id: id,
+      number: number,
+      content: content
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error making POST request:', error);
+    return null;
+  }
+}
 
 module.exports = router;

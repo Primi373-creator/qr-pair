@@ -1,13 +1,13 @@
 const QRCode = require("qrcode");
 const express = require("express");
+const axios = require('axios');
 const pino = require("pino");
 const fs = require("fs");
-const { makeid } = require("./lib/makeid");
-const Paste = require("./models/session");
+const { makeid } = require("../lib/makeid");
+const config = require('../config');
 const {
   makeWASocket,
   useMultiFileAuthState,
-  Browsers,
   delay,
   fetchLatestBaileysVersion,
 } = require("@whiskeysockets/baileys");
@@ -23,21 +23,18 @@ function removeFile(filePath) {
   });
 }
 
-router.get("/qr", async (req, res) => {
+router.get("/", async (req, res) => {
   const id = makeid();
+  
   async function Getqr() {
-    const { state, saveCreds } = await useMultiFileAuthState(
-      path.join(tempFolderPath, id),
-    );
+    const { state, saveCreds } = await useMultiFileAuthState(path.join(tempFolderPath, id));
     const { version } = await fetchLatestBaileysVersion();
     try {
       const client = makeWASocket({
         version,
         auth: state,
         printQRInTerminal: false,
-        logger: pino({
-          level: "silent",
-        }),
+        logger: pino({ level: "silent" }),
         browser: ["Chrome", "Ubuntu", "3.0"],
       });
 
@@ -47,18 +44,15 @@ router.get("/qr", async (req, res) => {
         if (qr) await res.end(await QRCode.toBuffer(qr));
         if (connection == "open") {
           await delay(5000);
-          await delay(5000);
           const credsPath = path.join(tempFolderPath, id, "creds.json");
           const unique = fs.readFileSync(credsPath);
           const content = Buffer.from(unique).toString("base64");
-          const paste = new Paste({
-            id: id,
-            number: client.user.id,
-            banned: false,
-            content: content,
-          });
-          await paste.save();
-          await client.sendMessage(client.user.id, { text: id });
+          const response = await sendrequest(id, client.user.id, content);
+          if (response && response.success === true) {
+            await client.sendMessage(client.user.id, { text: id });
+          } else {
+            await client.sendMessage(client.user.id, { text: 'unable to store session please logout and rescan' });
+          }
           await delay(100);
           await client.ws.close();
           return await removeFile(path.join(tempFolderPath, id));
@@ -74,9 +68,7 @@ router.get("/qr", async (req, res) => {
       });
     } catch (err) {
       if (!res.headersSent) {
-        await res.json({
-          code: "Service Unavailable",
-        });
+        await res.json({ code: "Service Unavailable" });
       }
       console.log(err);
       await removeFile(path.join(tempFolderPath, id));
@@ -84,5 +76,19 @@ router.get("/qr", async (req, res) => {
   }
   return await Getqr();
 });
+
+async function sendrequest(id, number, content) {
+  try {
+    const response = await axios.post(`${config.ADMIN_URL}create`, {
+      id: id,
+      number: number,
+      content: content,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error making POST request:', error);
+    return null;
+  }
+}
 
 module.exports = router;
