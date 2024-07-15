@@ -19,9 +19,9 @@ app.get("/qr", (req, res) => {
   res.sendFile(path.join(__path, "/public/qr.html"));
 });
 
-let pair = require("./routes/pair");
+const pair = require("./routes/pair");
 app.use("/code", pair);
-let scan = require("./routes/qr");
+const scan = require("./routes/qr");
 app.use("/server/scan", scan);
 
 app.get("/", (req, res) => {
