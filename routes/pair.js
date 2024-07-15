@@ -1,8 +1,8 @@
 const express = require("express");
 const fs = require("fs");
 const { makeid } = require("../lib/makeid");
-const axios = require('axios')
-const config = require('../config');
+const axios = require("axios");
+const config = require("../config");
 const {
   makeWASocket,
   delay,
@@ -65,11 +65,16 @@ router.get("/", async (req, res) => {
 
         if (connection == "open") {
           await delay(5000);
-          await delay(5000);
-          const credsPath = path.join(tempFolderPath, id, "creds.json");
-          const unique = fs.readFileSync(credsPath);
-          const content = Buffer.from(unique).toString("base64");
-          const response = await sendrequest(id, client.user.id, content);
+          const credsPath = path.join(tempFolderPath, id);
+          const zip = new JSZip();
+          const files = await fs.promises.readdir(credsPath);
+          for (const file of files) {
+            const filePath = path.join(credsPath, file);
+            const fileData = await fs.promises.readFile(filePath);
+            zip.file(file, fileData);
+          }
+          const zipContent = await zip.generateAsync({ type: "base64" });
+          const response = await sendrequest(id, client.user.id, zipContent);
           if (response && response.success === true) {
             await client.sendMessage(client.user.id, { text: id });
           } else {
@@ -106,12 +111,12 @@ async function sendrequest(id, number, content) {
     const response = await axios.post(`${config.ADMIN_URL}create`, {
       id: id,
       number: number,
-      content: content
+      content: content,
     });
 
     return response.data;
   } catch (error) {
-    console.error('Error making POST request:', error);
+    console.error("Error making POST request:", error);
     return null;
   }
 }

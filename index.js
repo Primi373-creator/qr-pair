@@ -1,36 +1,35 @@
-const express = require('express');
-const path = require('path');
+const express = require("express");
+const path = require("path");
 const bodyParser = require("body-parser");
 
 const app = express();
 const __path = process.cwd();
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8001;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(__path, 'public')));
+app.use(express.static(path.join(__path, "public")));
 
-app.get('/pair', (req, res) => {
-    res.sendFile(path.join(__path, '/public/pair.html'));
+app.get("/pair", (req, res) => {
+  res.sendFile(path.join(__path, "/public/pair.html"));
 });
 
-app.get('/qr', (req, res) => {
-    res.sendFile(path.join(__path, '/public/qr.html'));
+app.get("/qr", (req, res) => {
+  res.sendFile(path.join(__path, "/public/qr.html"));
 });
 
+let pair = require("./routes/pair");
+app.use("/code", pair);
+let scan = require("./routes/qr");
+app.use("/server/scan", scan);
 
-let pair = require('./routes/pair');
-app.use('/code', pair);
-let scan = require('./routes/qr');
-app.use('/server/scan', scan);
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__path, '/public/index.html'));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__path, "/public/index.html"));
 });
 
 app.listen(PORT, () => {
-    console.log('Server running on http://localhost:' + PORT);
+  console.log("Server running on http://localhost:" + PORT);
 });
 
 module.exports = app;
